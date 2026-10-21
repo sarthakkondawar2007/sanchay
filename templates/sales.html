@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SANCHAY | Sales & Billing</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body{font-family:Arial,sans-serif;margin:0;background:#f5f7f6;color:#202a26}
+    main{max-width:1100px;margin:30px auto;padding:20px}
+    .panel{background:white;padding:20px;border-radius:12px;margin:18px 0;box-shadow:0 2px 10px #0000000a}
+    input,select,button{padding:10px;border:1px solid #ccd5d0;border-radius:7px;margin:5px 0;max-width:100%}
+    button,.primary{background:#176b4d;color:white;border:0;padding:11px 15px;cursor:pointer;border-radius:7px}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{text-align:left;padding:10px;border-bottom:1px solid #e5e9e7}
+    .scroll{overflow-x:auto}.muted{color:#66736d}.total{font-size:22px;font-weight:bold}
+    a{color:#176b4d}.flash{padding:10px;background:#fff2d8;border-radius:7px}
+    @media(max-width:650px){main{padding:10px}.panel{padding:13px}table{font-size:13px}}
+  </style>
+</head>
+<body>
+<main>
+  <p><a href="{{ url_for('dashboard') }}">← Back to Dashboard</a></p>
+  <h1>Sales & Billing</h1>
+  <p class="muted">Create a sale, collect payment and generate a receipt.</p>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <p class="flash">{{ message }}</p>
+    {% endfor %}
+  {% endwith %}
+
+  <section class="panel">
+    <h2>Add product</h2>
+    <form method="post" action="{{ url_for('sales') }}">
+      <label for="product">Product</label><br>
+      <select id="product" name="product_id" required>
+        <option value="">Select a product</option>
+        {% for p in products %}
+          <option value="{{ p.id }}">
+            {{ p.name }} — {{ p.sku }} | Stock: {{ p.quantity }} | ₹{{ "%.2f"|format(p.selling_price) }}
+          </option>
+        {% endfor %}
+      </select><br>
+      <label for="quantity">Quantity</label><br>
+      <input id="quantity" type="number" name="quantity" min="1" value="1" required><br>
+      <button type="submit">Add to cart</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Current bill</h2>
+    {% if cart_items %}
+      <div class="scroll">
+      <table>
+        <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th><th></th></tr></thead>
+        <tbody>
+        {% for item in cart_items %}
+          <tr>
+            <td>{{ item.name }}<br><small>{{ item.sku }}</small></td>
+            <td>{{ item.cart_quantity }}</td>
+            <td>₹{{ "%.2f"|format(item.selling_price) }}</td>
+            <td>₹{{ "%.2f"|format(item.line_total) }}</td>
+            <td>
+              <form method="post" action="{{ url_for('remove_from_sales_cart', product_id=item.id) }}">
+                <button type="submit">Remove</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      <p class="total">Total: ₹{{ "%.2f"|format(cart_total) }}</p>
+      <form method="post" action="{{ url_for('checkout_sale') }}">
+        <label for="customer">Customer name (optional)</label><br>
+        <input id="customer" name="customer_name" maxlength="120" placeholder="Customer name"><br>
+        <label for="payment">Payment method</label><br>
+        <select id="payment" name="payment_method">
+          <option>Cash</option><option>UPI</option><option>Card</option><option>Other</option>
+        </select><br>
+        <button type="submit" onclick="return confirm('Complete this sale and deduct stock?')">Complete sale & generate receipt</button>
+      </form>
+      <form method="post" action="{{ url_for('clear_sales_cart') }}">
+        <button type="submit">Clear cart</button>
+      </form>
+    {% else %}
+      <p class="muted">Your cart is empty. Add a product above to start billing.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <h2>Recent transactions</h2>
+    <div class="scroll">
+    <table>
+      <thead><tr><th>Receipt</th><th>Customer</th><th>Payment</th><th>Total</th><th>Date</th></tr></thead>
+      <tbody>
+      {% for sale in recent_sales %}
+        <tr>
+          <td><a href="{{ url_for('sale_receipt', sale_id=sale.id) }}">{{ sale.receipt_number }}</a></td>
+          <td>{{ sale.customer_name or "Walk-in" }}</td>
+          <td>{{ sale.payment_method }}</td>
+          <td>₹{{ "%.2f"|format(sale.total_amount) }}</td>
+          <td>{{ sale.created_at }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5">No sales recorded yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </section>
+</main>
+</body>
+</html>

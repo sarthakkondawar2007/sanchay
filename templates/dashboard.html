@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SANCHAY AI — {{ role }} Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .dash{max-width:1250px;margin:32px auto;padding:22px}
+    .dash-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+    .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin:24px 0}
+    .dash-card,.module-card,.dash-panel{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px}
+    .dash-card p,.muted{color:#6b7280}
+    .dash-card h2{font-size:27px;margin:8px 0}
+    .module-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+    .module-card h3{margin-top:0}
+    .module-card p{color:#6b7280;font-size:14px}
+    .module-card a{font-weight:600}
+    .dash-link{padding:10px 15px;border:1px solid #ddd;border-radius:8px;text-decoration:none}
+    .dash-panel{margin-top:22px}
+  </style>
+</head>
+<body>
+<main class="dash">
+  <header class="dash-head">
+    <div>
+      <h1>SANCHAY <span>AI</span></h1>
+      <p class="muted">{{ role }} Workspace · {{ business }}</p>
+    </div>
+    <a class="dash-link" href="{{ url_for('logout') }}">Log out</a>
+  </header>
+
+  <h2>Business overview</h2>
+  <p class="muted">Your business information in one place.</p>
+
+  <section class="dash-grid">
+    <article class="dash-card">
+      <p>Total products</p><h2>{{ metrics.products }}</h2>
+    </article>
+    <article class="dash-card">
+      <p>Units in stock</p><h2>{{ metrics.units }}</h2>
+    </article>
+    <article class="dash-card">
+      <p>Stock purchase value</p><h2>₹{{ "%.2f"|format(metrics.stock_value) }}</h2>
+    </article>
+    <article class="dash-card">
+      <p>Today's sales</p><h2>₹{{ "%.2f"|format(metrics.today_sales) }}</h2>
+    </article>
+    <article class="dash-card">
+      <p>This month's sales</p><h2>₹{{ "%.2f"|format(metrics.month_sales) }}</h2>
+    </article>
+    <article class="dash-card">
+      <p>Low-stock products</p><h2>{{ metrics.low_stock }}</h2>
+    </article>
+  </section>
+
+  {% if role == "Admin" %}
+  <h2>Management modules</h2>
+  <section class="module-grid">
+    <article class="module-card">
+      <h3>📦 Inventory</h3>
+      <p>Products, SKU/barcodes, stock levels, batches and expiry dates.</p>
+      <a href="/products">Open inventory →</a>
+    </article>
+    <article class="module-card">
+      <h3>🧾 Sales & billing</h3>
+      <p><a href="{{ url_for('sales') }}">Open Sales & Billing →</a></p>
+      <p>Checkout, receipts, transaction history and stock deduction.</p>
+      <p>Module in development</p>
+    </article>
+    <article class="module-card">
+      <h3>🚚 Suppliers & purchases</h3>
+      <p>Supplier records, purchase orders and stock receiving.</p>
+      <p>Module in development</p>
+    </article>
+    <article class="module-card">
+      <h3>💳 Credit & borrowing</h3>
+      <p>Customer balances, repayment history and borrower evidence.</p>
+      <p>Module in development</p>
+    </article>
+    <article class="module-card">
+      <h3>📊 Reports & analytics</h3>
+      <p>Sales trends, stock valuation and business performance.</p>
+      <p>Module in development</p>
+    </article>
+    <article class="module-card">
+      <h3>🤖 SANCHAY AI</h3>
+      <p>Inventory questions and verified business insights.</p>
+      <p>Module in development</p>
+    </article>
+  </section>
+  {% else %}
+  <h2>Staff workspace</h2>
+  <section class="module-grid">
+    <article class="module-card">
+      <h3>🧾 Sales & billing</h3>
+      <p><a href="{{ url_for('sales') }}">Open Sales & Billing →</a></p>
+      <p>Sales workflow and receipts.</p>
+      <p>Module in development</p>
+    </article>
+    <article class="module-card">
+      <h3>📦 Inventory lookup</h3>
+      <p>Product and stock lookup for permitted tasks.</p>
+      <p>Module in development</p>
+    </article>
+    <article class="module-card">
+      <h3>🕒 Recent transactions</h3>
+      <p>Today's sales: {{ metrics.today_transactions }} transactions.</p>
+    </article>
+  </section>
+  {% endif %}
+
+  <section class="dash-panel">
+    <h3>Workspace access</h3>
+    <p class="muted">
+      You are signed in as {{ role }}. Administrative pages remain restricted
+      according to your account role.
+    </p>
+  </section>
+</main>
+</body>
+</html>
+
+<p><a href="{{ url_for('suppliers') }}">Manage Suppliers →</a></p>
+
+<p><a href="{{ url_for('purchases') }}">Record Purchases →</a></p>
+
+<p><a href="{{ url_for('credits') }}">Credit & Borrowing →</a></p>
+
+<p><a href="{{ url_for('reports') }}">Reports & Analytics →</a></p>

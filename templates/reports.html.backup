@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Reports & Analytics</h1>
+        <p>Understand your business performance using recorded data.</p>
+    </div>
+</div>
+
+<form method="GET" action="{{ url_for('reports') }}">
+    <label>From</label>
+    <input type="date" name="start" value="{{ start }}" required>
+    <label>To</label>
+    <input type="date" name="end" value="{{ end }}" required>
+    <button type="submit">Apply Filter</button>
+</form>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Sales Revenue</h3>
+        <h2>₹{{ "%.2f"|format(sales.revenue or 0) }}</h2>
+        <p>{{ sales.transactions }} transactions</p>
+    </div>
+    <div class="stat-card">
+        <h3>Discounts Given</h3>
+        <h2>₹{{ "%.2f"|format(sales.discounts or 0) }}</h2>
+    </div>
+    <div class="stat-card">
+        <h3>Received Purchases</h3>
+        <h2>₹{{ "%.2f"|format(purchases.total or 0) }}</h2>
+        <p>{{ purchases.transactions }} purchase records</p>
+    </div>
+    <div class="stat-card">
+        <h3>Low-Stock Products</h3>
+        <h2>{{ low_stock|length }}</h2>
+        <p>Products at or below their configured threshold</p>
+    </div>
+</div>
+
+<section class="panel">
+    <h2>Best-Selling Products</h2>
+    {% if top_products %}
+    <table>
+        <thead>
+            <tr><th>Product</th><th>Units Sold</th><th>Sales Revenue</th></tr>
+        </thead>
+        <tbody>
+        {% for item in top_products %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.units }}</td>
+                <td>₹{{ "%.2f"|format(item.revenue or 0) }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No sales recorded for this date range.</p>
+    {% endif %}
+</section>
+
+<section class="panel">
+    <h2>Daily Sales</h2>
+    {% if daily_sales %}
+    <table>
+        <thead>
+            <tr><th>Date</th><th>Transactions</th><th>Revenue</th></tr>
+        </thead>
+        <tbody>
+        {% for item in daily_sales %}
+            <tr>
+                <td>{{ item.day }}</td>
+                <td>{{ item.transactions }}</td>
+                <td>₹{{ "%.2f"|format(item.revenue or 0) }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No daily sales data available.</p>
+    {% endif %}
+</section>
+
+<section class="panel">
+    <h2>Low-Stock Alerts</h2>
+    {% if low_stock %}
+    <table>
+        <thead>
+            <tr><th>Product</th><th>SKU</th><th>Available</th><th>Threshold</th></tr>
+        </thead>
+        <tbody>
+        {% for item in low_stock %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.sku }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.low_stock_threshold }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No low-stock products found.</p>
+    {% endif %}
+</section>
+
+<p><a href="{{ url_for('dashboard') }}">← Back to Dashboard</a></p>
+{% endblock %}

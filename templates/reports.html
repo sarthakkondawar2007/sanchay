@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SANCHAY AI — Reports</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+.report-wrap{max-width:1200px;margin:32px auto;padding:22px}
+.report-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:24px 0}
+.report-card,.report-panel{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px;margin-bottom:20px}
+.report-panel{overflow-x:auto}
+.report-wrap table{width:100%;border-collapse:collapse}
+.report-wrap th,.report-wrap td{text-align:left;padding:12px;border-bottom:1px solid #eee}
+.report-wrap input,.report-wrap button{padding:10px;margin:6px 6px 6px 0}
+.report-wrap a{color:#2563eb}
+</style>
+</head>
+<body>
+<main class="report-wrap">
+<header>
+<h1>SANCHAY AI — Reports &amp; Analytics</h1>
+<p>Business performance and inventory insights</p>
+<a href="{{ url_for('admin') }}">Admin Dashboard</a> |
+<a href="{{ url_for('staff') }}">Staff Dashboard</a> |
+<a href="{{ url_for('logout') }}">Log out</a>
+</header>
+
+
+<div class="page-header">
+    <div>
+        <h1>Reports & Analytics</h1>
+        <p>Understand your business performance using recorded data.</p>
+    </div>
+</div>
+
+<form method="GET" action="{{ url_for('reports') }}">
+    <label>From</label>
+    <input type="date" name="start" value="{{ start }}" required>
+    <label>To</label>
+    <input type="date" name="end" value="{{ end }}" required>
+    <button type="submit">Apply Filter</button>
+</form>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Sales Revenue</h3>
+        <h2>₹{{ "%.2f"|format(sales.revenue or 0) }}</h2>
+        <p>{{ sales.transactions }} transactions</p>
+    </div>
+    <div class="stat-card">
+        <h3>Discounts Given</h3>
+        <h2>₹{{ "%.2f"|format(sales.discounts or 0) }}</h2>
+    </div>
+    <div class="stat-card">
+        <h3>Received Purchases</h3>
+        <h2>₹{{ "%.2f"|format(purchases.total or 0) }}</h2>
+        <p>{{ purchases.transactions }} purchase records</p>
+    </div>
+    <div class="stat-card">
+        <h3>Low-Stock Products</h3>
+        <h2>{{ low_stock|length }}</h2>
+        <p>Products at or below their configured threshold</p>
+    </div>
+</div>
+
+<section class="panel">
+    <h2>Best-Selling Products</h2>
+    {% if top_products %}
+    <table>
+        <thead>
+            <tr><th>Product</th><th>Units Sold</th><th>Sales Revenue</th></tr>
+        </thead>
+        <tbody>
+        {% for item in top_products %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.units }}</td>
+                <td>₹{{ "%.2f"|format(item.revenue or 0) }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No sales recorded for this date range.</p>
+    {% endif %}
+</section>
+
+<section class="panel">
+    <h2>Daily Sales</h2>
+    {% if daily_sales %}
+    <table>
+        <thead>
+            <tr><th>Date</th><th>Transactions</th><th>Revenue</th></tr>
+        </thead>
+        <tbody>
+        {% for item in daily_sales %}
+            <tr>
+                <td>{{ item.day }}</td>
+                <td>{{ item.transactions }}</td>
+                <td>₹{{ "%.2f"|format(item.revenue or 0) }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No daily sales data available.</p>
+    {% endif %}
+</section>
+
+<section class="panel">
+    <h2>Low-Stock Alerts</h2>
+    {% if low_stock %}
+    <table>
+        <thead>
+            <tr><th>Product</th><th>SKU</th><th>Available</th><th>Threshold</th></tr>
+        </thead>
+        <tbody>
+        {% for item in low_stock %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.sku }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.low_stock_threshold }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No low-stock products found.</p>
+    {% endif %}
+</section>
+
+<p><a href="{{ url_for('admin') }}">← Back to Dashboard</a></p>
+</main></body></html>

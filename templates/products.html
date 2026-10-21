@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SANCHAY AI — Inventory</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+.inventory{max-width:1250px;margin:28px auto;padding:20px}
+.head,.actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.cards,.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin:20px 0}
+.card,.panel{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px}
+.card p{color:#6b7280;margin:0}.card h2{margin-bottom:0}
+input,button{font:inherit;padding:10px;border:1px solid #d1d5db;border-radius:7px;box-sizing:border-box}
+input{width:100%}button{cursor:pointer}
+.form-grid label{display:block;font-size:13px;color:#555}
+.form-grid input{margin-top:5px}
+table{width:100%;border-collapse:collapse;min-width:1000px}
+th,td{text-align:left;padding:11px;border-bottom:1px solid #eee}
+.table-wrap{overflow-x:auto}
+.error{color:#b42318}.notice{color:#167647}
+</style>
+</head>
+<body>
+<main class="inventory">
+  <header class="head">
+    <div><h1>SANCHAY <span>AI</span></h1><h2>Product & Inventory</h2></div>
+    <nav><a href="{{ url_for('admin') }}">Dashboard</a> · <a href="{{ url_for('logout') }}">Log out</a></nav>
+  </header>
+
+  {% for message in get_flashed_messages() %}
+    <p class="notice">{{ message }}</p>
+  {% endfor %}
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+  <section class="cards">
+    <article class="card"><p>Total products</p><h2>{{ summary.total }}</h2></article>
+    <article class="card"><p>Total units</p><h2>{{ summary.units }}</h2></article>
+    <article class="card"><p>Purchase stock value</p><h2>₹{{ "%.2f"|format(summary.value) }}</h2></article>
+    <article class="card"><p>Potential retail value</p><h2>₹{{ "%.2f"|format(summary.retail_value) }}</h2></article>
+    <article class="card"><p>Low-stock products</p><h2>{{ summary.low_stock }}</h2></article>
+  </section>
+
+  <section class="panel">
+    <h2>Add product</h2>
+    <form method="post">
+      <div class="form-grid">
+        <label>SKU *<input name="sku" required></label>
+        <label>Barcode<input name="barcode"></label>
+        <label>Product name *<input name="name" required></label>
+        <label>Category<input name="category"></label>
+        <label>Quantity<input name="quantity" type="number" min="0" value="0" required></label>
+        <label>Purchase price (₹)<input name="purchase_price" type="number" min="0" step="0.01" value="0" required></label>
+        <label>Selling price (₹)<input name="selling_price" type="number" min="0" step="0.01" value="0" required></label>
+        <label>Batch number<input name="batch_no"></label>
+        <label>Expiry date<input name="expiry_date" type="date"></label>
+        <label>Low-stock alert at<input name="low_stock_threshold" type="number" min="0" value="5" required></label>
+      </div>
+      <button type="submit">Save product</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="head">
+      <h2>Product records</h2>
+      <form method="get" class="actions">
+        <input name="q" value="{{ search }}" placeholder="Search products, SKU, barcode..." aria-label="Search inventory">
+        <button type="submit">Search</button>
+        <a href="{{ url_for('products') }}">Clear</a>
+      </form>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>SKU</th><th>Barcode</th><th>Product</th><th>Category</th><th>Qty</th><th>Purchase ₹</th><th>Selling ₹</th><th>Batch</th><th>Expiry</th><th>Stock status</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for p in products %}
+          <tr>
+            <td>{{ p.sku }}</td><td>{{ p.barcode or '—' }}</td><td>{{ p.name }}</td>
+            <td>{{ p.category or '—' }}</td><td>{{ p.quantity }}</td>
+            <td>{{ "%.2f"|format(p.purchase_price) }}</td><td>{{ "%.2f"|format(p.selling_price) }}</td>
+            <td>{{ p.batch_no or '—' }}</td><td>{{ p.expiry_date or '—' }}</td>
+            <td>{% if p.quantity <= p.low_stock_threshold %}Low stock{% else %}In stock{% endif %}</td>
+            <td>
+              <a href="{{ url_for('edit_product', product_id=p.id) }}">Edit</a>
+              <form method="post" action="{{ url_for('delete_product', product_id=p.id) }}" onsubmit="return confirm('Delete this product?');" style="display:inline">
+                <button type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="11">No products found.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+</body>
+</html>

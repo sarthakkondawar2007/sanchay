@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SANCHAY | Repayment History</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:850px;margin:30px auto;padding:20px;background:#f5f7f6}
+section{background:white;padding:20px;border-radius:12px;margin:16px 0}
+table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:10px;border-bottom:1px solid #ddd}
+</style>
+</head>
+<body>
+<p><a href="{{ url_for('credits') }}">← Back to Credits</a></p>
+<h1>Repayment History</h1>
+<section>
+<h2>{{ credit.customer_name }}</h2>
+<p>Borrowed: ₹{{ "%.2f"|format(credit.amount) }}</p>
+<p>Paid: ₹{{ "%.2f"|format(credit.amount_paid) }}</p>
+<p>Outstanding: ₹{{ "%.2f"|format([credit.amount-credit.amount_paid, 0]|max) }}</p>
+<p>Status: {{ credit.status }}</p>
+</section>
+<section>
+<h2>Payments</h2>
+<table><thead><tr><th>Amount</th><th>Notes</th><th>Received by</th><th>Date</th></tr></thead>
+<tbody>
+{% for p in payments %}
+<tr><td>₹{{ "%.2f"|format(p.amount) }}</td><td>{{ p.notes }}</td><td>{{ p.receiver or "—" }}</td><td>{{ p.created_at }}</td></tr>
+{% else %}
+<tr><td colspan="4">No repayments recorded yet.</td></tr>
+{% endfor %}
+</tbody></table>
+</section>
+</body>
+</html>

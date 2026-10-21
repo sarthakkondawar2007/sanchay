@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SANCHAY | Purchases</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body{font-family:Arial,sans-serif;background:#f5f7f6;color:#202a26}
+main{max-width:1100px;margin:30px auto;padding:20px}
+.panel{background:white;padding:20px;border-radius:12px;margin:18px 0}
+input,select,textarea,button{padding:10px;margin:5px 0;border:1px solid #ccd5d0;border-radius:7px;max-width:100%}
+button{background:#176b4d;color:white;cursor:pointer}
+table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:10px;border-bottom:1px solid #ddd}
+.scroll{overflow-x:auto}.flash{padding:10px;background:#fff0d5}
+</style>
+</head>
+<body>
+<main>
+<p><a href="/admin">← Dashboard</a> | <a href="{{ url_for('suppliers') }}">Manage suppliers</a></p>
+<h1>Supplier Purchases</h1>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<p class="flash">{{ message }}</p>{% endfor %}
+{% endwith %}
+<section class="panel">
+<h2>Record received purchase</h2>
+{% if not suppliers %}<p>Add a supplier first.</p>{% endif %}
+{% if not products %}<p>Add a product in Inventory first.</p>{% endif %}
+<form method="post">
+<label>Supplier *</label><br>
+<select name="supplier_id" required>
+<option value="">Select supplier</option>
+{% for s in suppliers %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+</select><br>
+<label>Product *</label><br>
+<select name="product_id" required>
+<option value="">Select product</option>
+{% for p in products %}
+<option value="{{ p.id }}">{{ p.name }} ({{ p.sku }}) — Current stock: {{ p.quantity }}</option>
+{% endfor %}
+</select><br>
+<label>Quantity received *</label><br><input type="number" name="quantity" min="1" required><br>
+<label>Unit purchase cost (₹) *</label><br><input type="number" name="unit_cost" min="0" step="0.01" required><br>
+<label>Supplier invoice number</label><br><input name="invoice_number" maxlength="100"><br>
+<label>Notes</label><br><textarea name="notes" maxlength="1000"></textarea><br>
+<button type="submit" {% if not suppliers or not products %}disabled{% endif %}>Record purchase & update stock</button>
+</form>
+<p>Purchase total is calculated as quantity × unit cost.</p>
+</section>
+<section class="panel">
+<h2>Purchase history</h2><div class="scroll"><table>
+<thead><tr><th>ID</th><th>Invoice</th><th>Supplier</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+<tbody>
+{% for p in purchases %}
+<tr><td>{{ p.id }}</td><td>{{ p.invoice_number or "—" }}</td><td>{{ p.supplier_name or "—" }}</td><td>₹{{ "%.2f"|format(p.total_amount) }}</td><td>{{ p.status }}</td><td>{{ p.created_at }}</td></tr>
+{% else %}
+<tr><td colspan="6">No purchases recorded yet.</td></tr>
+{% endfor %}
+</tbody></table></div>
+</section>
+</main>
+</body>
+</html>

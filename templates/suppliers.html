@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SANCHAY | Suppliers</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+body{font-family:Arial,sans-serif;background:#f5f7f6;color:#202a26}
+main{max-width:1000px;margin:30px auto;padding:20px}
+.panel{background:white;padding:20px;border-radius:12px;margin:18px 0}
+input,textarea,button{padding:10px;margin:5px 0;border:1px solid #ccd5d0;border-radius:7px;max-width:100%}
+button{background:#176b4d;color:white;cursor:pointer}
+table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:10px;border-bottom:1px solid #ddd}
+.scroll{overflow-x:auto}.flash{padding:10px;background:#fff0d5}
+</style>
+</head>
+<body>
+<main>
+<p><a href="/admin">← Dashboard</a> | <a href="{{ url_for('purchases') }}">Purchases →</a></p>
+<h1>Supplier Management</h1>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<p class="flash">{{ message }}</p>{% endfor %}
+{% endwith %}
+<section class="panel">
+<h2>Add supplier</h2>
+<form method="post">
+<label>Supplier name *</label><br><input name="name" required maxlength="150"><br>
+<label>Phone</label><br><input name="phone" maxlength="30"><br>
+<label>Email</label><br><input name="email" type="email" maxlength="150"><br>
+<label>Address</label><br><textarea name="address" maxlength="500"></textarea><br>
+<label>Notes</label><br><textarea name="notes" maxlength="1000"></textarea><br>
+<button type="submit">Save supplier</button>
+</form>
+</section>
+<section class="panel">
+<h2>Suppliers</h2><div class="scroll"><table>
+<thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Address</th><th>Purchases</th></tr></thead>
+<tbody>
+{% for s in suppliers %}
+<tr><td>{{ s.name }}</td><td>{{ s.phone }}</td><td>{{ s.email }}</td><td>{{ s.address }}</td><td>{{ s.purchase_count }}</td></tr>
+{% else %}
+<tr><td colspan="5">No suppliers added yet.</td></tr>
+{% endfor %}
+</tbody></table></div>
+</section>
+</main>
+</body>
+</html>

@@ -13,7 +13,16 @@ input,textarea,button{padding:10px;margin:5px 0;border:1px solid #ccd5d0;border-
 button{background:#176b4d;color:white;cursor:pointer}
 table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:10px;border-bottom:1px solid #ddd}
 .scroll{overflow-x:auto}.flash{padding:10px;background:#fff0d5}
-</style>
+
+.camera-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0}
+.file-label{display:inline-flex;flex-direction:column;gap:8px;padding:10px 14px;border:1px solid #ccd5d0;border-radius:9px;cursor:pointer;font-size:14px}
+#cameraPanel,#photoPreviewWrap{margin:14px 0;padding:14px;background:#f5f8f6;border:1px solid #dce7e0;border-radius:12px}
+#cameraVideo,#photoPreview{display:block;width:100%;max-width:520px;max-height:360px;object-fit:contain;background:#172b25;border-radius:10px}
+#photoPreview{background:#fff}
+.camera-help{color:#64756c;font-size:13px;line-height:1.5}
+.consent-label{display:flex;align-items:flex-start;gap:8px;margin:12px 0}
+.consent-label input{margin-top:3px}
+\n</style>
 </head>
 <body>
 <main>
@@ -42,10 +51,32 @@ table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:10px;bor
 <input name="due_date" type="date"><br>
 <label>Notes</label><br>
 <textarea name="notes" maxlength="1000"></textarea><br>
-<label>Optional photo evidence (camera or file)</label><br>
-<input type="file" name="photo" accept="image/*" capture="environment"><br>
-<label><input type="checkbox" name="photo_consent" value="yes">
-Customer has consented to capture and store this photo.</label><br>
+<label>Photo evidence</label>
+<div class="camera-actions">
+  <button type="button" id="openCamera">Open Camera</button>
+  <label class="file-label">Choose Existing Photo
+    <input type="file" id="photoInput" name="photo" accept="image/jpeg,image/png,image/webp">
+  </label>
+</div>
+<div id="cameraPanel" hidden>
+  <video id="cameraVideo" autoplay playsinline muted></video>
+  <div class="camera-actions">
+    <button type="button" id="capturePhoto">Capture Photo</button>
+    <button type="button" id="closeCamera">Close Camera</button>
+  </div>
+</div>
+<div id="photoPreviewWrap" hidden>
+  <p>Photo preview</p>
+  <img id="photoPreview" alt="Captured customer evidence preview">
+  <div class="camera-actions">
+    <button type="button" id="retakePhoto">Retake Photo</button>
+  </div>
+</div>
+<p class="camera-help">Camera access requires your permission. Only capture a photo with the customer's consent.</p>
+<label class="consent-label">
+  <input type="checkbox" name="photo_consent" value="yes">
+  Customer has consented to capture and store this photo.
+</label><br>
 <button type="submit">Save borrowing record</button>
 </form>
 </section>
@@ -80,5 +111,114 @@ Customer has consented to capture and store this photo.</label><br>
 </tbody></table></div>
 </section>
 </main>
-</body>
+
+<script>
+(() => {
+  const openBtn = document.getElementById("openCamera");
+  const captureBtn = document.getElementById("capturePhoto");
+  const closeBtn = document.getElementById("closeCamera");
+  const retakeBtn = document.getElementById("retakePhoto");
+  const video = document.getElementById("cameraVideo");
+  const panel = document.getElementById("cameraPanel");
+  const previewWrap = document.getElementById("photoPreviewWrap");
+  const preview = document.getElementById("photoPreview");
+  const photoInput = document.getElementById("photoInput");
+  const form = photoInput.closest("form");
+  let stream = null;
+  let previewUrl = null;
+
+  function stopCamera() {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+    video.srcObject = null;
+    panel.hidden = true;
+  }
+
+  function clearPreview() {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = null;
+    preview.removeAttribute("src");
+    previewWrap.hidden = true;
+  }
+
+  openBtn.addEventListener("click", async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("Camera access is unavailable here. Use Choose Existing Photo instead.");
+      return;
+    }
+    try {
+      stopCamera();
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false
+      });
+      video.srcObject = stream;
+      panel.hidden = false;
+      await video.play();
+    } catch (error) {
+      stopCamera();
+      alert("Could not open the camera. Allow camera permission or choose an existing photo.");
+    }
+  });
+
+  captureBtn.addEventListener("click", () => {
+    if (!video.videoWidth || !video.videoHeight) {
+      alert("Please wait until the camera preview is ready.");
+      return;
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0);
+    canvas.toBlob(blob => {
+      if (!blob) {
+        alert("Photo capture failed. Please try again.");
+        return;
+      }
+      const file = new File([blob], "credit-evidence.jpg", {type: "image/jpeg"});
+      const transfer = new DataTransfer();
+      transfer.items.add(file);
+      photoInput.files = transfer.files;
+      clearPreview();
+      previewUrl = URL.createObjectURL(blob);
+      preview.src = previewUrl;
+      previewWrap.hidden = false;
+      stopCamera();
+    }, "image/jpeg", 0.9);
+  });
+
+  closeBtn.addEventListener("click", stopCamera);
+
+  retakeBtn.addEventListener("click", () => {
+    photoInput.value = "";
+    clearPreview();
+    openBtn.click();
+  });
+
+  photoInput.addEventListener("change", () => {
+    clearPreview();
+    if (photoInput.files && photoInput.files[0]) {
+      previewUrl = URL.createObjectURL(photoInput.files[0]);
+      preview.src = previewUrl;
+      previewWrap.hidden = false;
+    }
+  });
+
+  form.addEventListener("submit", event => {
+    if (photoInput.files.length &&
+        !form.querySelector('[name="photo_consent"]').checked) {
+      event.preventDefault();
+      alert("Please confirm customer consent before saving photo evidence.");
+    }
+  });
+
+  window.addEventListener("pagehide", () => {
+    stopCamera();
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  });
+})();
+</script>
+\n</body>
 </html>

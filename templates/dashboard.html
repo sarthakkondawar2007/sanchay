@@ -1,130 +1,173 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SANCHAY AI — {{ role }} Dashboard</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <style>
-    .dash{max-width:1250px;margin:32px auto;padding:22px}
-    .dash-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-    .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin:24px 0}
-    .dash-card,.module-card,.dash-panel{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px}
-    .dash-card p,.muted{color:#6b7280}
-    .dash-card h2{font-size:27px;margin:8px 0}
-    .module-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-    .module-card h3{margin-top:0}
-    .module-card p{color:#6b7280;font-size:14px}
-    .module-card a{font-weight:600}
-    .dash-link{padding:10px 15px;border:1px solid #ddd;border-radius:8px;text-decoration:none}
-    .dash-panel{margin-top:22px}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SANCHAY AI — Business Dashboard</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+:root{--navy:#111827;--blue:#4f46e5;--bg:#f5f7fb;--ink:#182230;--muted:#7b8497;--line:#e9edf4}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px}
+a{text-decoration:none;color:inherit}
+.layout{min-height:100vh}
+.sidebar{position:fixed;inset:0 auto 0 0;width:248px;background:var(--navy);color:#aab4c6;padding:27px 17px;display:flex;flex-direction:column;z-index:5}
+.brand{display:flex;align-items:center;gap:11px;padding:0 10px 33px;color:#fff;font-size:21px;font-weight:850;letter-spacing:-.7px}
+.brand-icon{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#818cf8,#4f46e5);display:grid;place-items:center;color:white;font-size:19px}
+.brand small{display:block;font-size:9px;letter-spacing:2.5px;color:#8f9bb0;margin-top:3px}
+.nav-label{font-size:10px;letter-spacing:1.7px;color:#68758a;padding:12px 12px 9px;font-weight:800}
+.nav-link{display:flex;align-items:center;gap:12px;padding:12px 13px;border-radius:10px;margin:3px 0;font-weight:550;font-size:13px;transition:.2s}
+.nav-link:hover,.nav-link.active{background:#293248;color:#fff}
+.nav-link.active{box-shadow:inset 3px 0 #818cf8}
+.nav-icon{width:22px;text-align:center;font-size:17px}
+.sidebar-bottom{margin-top:auto;border-top:1px solid #2a3344;padding:17px 6px 0}
+.profile{display:flex;align-items:center;gap:10px;padding:9px}
+.avatar{width:37px;height:37px;display:grid;place-items:center;border-radius:12px;background:#374151;color:white;font-weight:800}
+.profile strong{display:block;color:white;font-size:12px}
+.profile small{display:block;color:#98a4b8;margin-top:4px;font-size:11px}
+.main{margin-left:248px;padding:30px 36px 45px;max-width:1800px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:28px}
+.eyebrow{font-size:11px;color:var(--muted);margin-bottom:7px}
+h1{font-size:27px;letter-spacing:-1px;margin:0;font-weight:800}
+.top-actions{display:flex;align-items:center;gap:12px}
+.date-chip,.logout{padding:11px 14px;border:1px solid var(--line);background:white;border-radius:11px;font-size:12px;color:#475569}
+.logout{font-weight:700}
+.welcome{padding:25px 28px;border-radius:19px;background:linear-gradient(115deg,#202d55,#4338a8 70%,#6256dc);color:white;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.welcome:after{content:"";position:absolute;width:230px;height:230px;border:1px solid #ffffff20;border-radius:50%;right:90px;top:-135px;box-shadow:0 0 0 32px #ffffff08,0 0 0 65px #ffffff06}
+.welcome-copy{position:relative;z-index:1}
+.welcome .tag{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#c7d2fe;font-weight:800}
+.welcome h2{font-size:24px;letter-spacing:-.6px;margin:10px 0 8px}
+.welcome p{color:#e0e7ff;font-size:12px;line-height:1.7;margin:0;max-width:500px}
+.welcome-mark{position:relative;z-index:1;font-size:48px;background:#ffffff16;border:1px solid #ffffff20;border-radius:20px;padding:17px}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:29px 0 15px}
+.section-head h2{font-size:17px;letter-spacing:-.4px;margin:0}
+.section-head p{margin:5px 0 0;color:var(--muted);font-size:12px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.kpi{padding:19px;background:white;border:1px solid var(--line);border-radius:15px;min-width:0;box-shadow:0 3px 12px #15254a04}
+.kpi-top{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#667085;font-size:12px;font-weight:600}
+.kpi-icon{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;font-size:17px;background:#eef2ff}
+.kpi:nth-child(2) .kpi-icon{background:#dcfce7}
+.kpi:nth-child(3) .kpi-icon{background:#fef3c7}
+.kpi:nth-child(4) .kpi-icon{background:#fce7f3}
+.kpi:nth-child(5) .kpi-icon{background:#e0f2fe}
+.kpi:nth-child(6) .kpi-icon{background:#fee2e2}
+.kpi-value{font-size:28px;font-weight:800;letter-spacing:-1px;margin:16px 0 6px;overflow-wrap:anywhere}
+.kpi-foot{font-size:11px;color:var(--muted)}
+.kpi-foot strong{color:#475569}
+.content-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(250px,1fr);gap:16px;margin-top:22px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:21px;min-width:0}
+.panel h3{font-size:15px;margin:0 0 6px}
+.panel-sub{color:var(--muted);font-size:11px;margin:0 0 19px}
+.module-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.module{display:flex;align-items:flex-start;gap:12px;padding:15px;border:1px solid var(--line);border-radius:12px;transition:transform .18s,border-color .18s,box-shadow .18s;min-width:0}
+.module:hover{transform:translateY(-2px);border-color:#c7d2fe;box-shadow:0 7px 18px #2737790b}
+.module-icon{flex-shrink:0;width:39px;height:39px;border-radius:12px;display:grid;place-items:center;font-size:19px;background:#eef2ff}
+.module:nth-child(2) .module-icon{background:#dcfce7}
+.module:nth-child(3) .module-icon{background:#fef3c7}
+.module:nth-child(4) .module-icon{background:#fce7f3}
+.module:nth-child(5) .module-icon{background:#e0f2fe}
+.module:nth-child(6) .module-icon{background:#ede9fe}
+.module h4{font-size:12px;margin:2px 0 6px}
+.module p{font-size:11px;color:var(--muted);line-height:1.6;margin:0}
+.module .arrow{margin-left:auto;color:#818cf8;font-size:17px}
+.quick-list{display:grid;gap:10px}
+.quick-link{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;background:#f8f9fc;border:1px solid #f0f2f7}
+.quick-link:hover{background:#eef2ff}
+.quick-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:white;font-size:16px}
+.quick-link strong{font-size:12px;display:block}
+.quick-link small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+.quick-arrow{margin-left:auto;color:#94a3b8}
+.bottom-note{margin-top:18px;padding:14px 17px;border-radius:12px;background:#eef2ff;color:#4f46e5;font-size:11px;line-height:1.7}
+footer{text-align:center;color:#9aa3b2;font-size:10px;padding-top:28px}
+@media(min-width:1450px){.main{padding-left:48px;padding-right:48px}.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1050px){.sidebar{width:210px}.main{margin-left:210px;padding:25px 20px}.content-grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.sidebar{position:static;width:100%;padding:14px 12px 10px}.brand{padding:0 7px 13px}.sidebar nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}.nav-label{display:none}.nav-link{white-space:nowrap;flex-shrink:0;padding:10px}.nav-icon{font-size:15px}.sidebar-bottom{display:none}.main{margin-left:0;padding:21px 14px 30px}.topbar{margin-bottom:19px}h1{font-size:23px}.date-chip{display:none}.welcome{padding:22px 19px}.welcome h2{font-size:21px}.welcome-mark{font-size:30px;padding:12px}.kpis{gap:10px}.kpi{padding:14px}.kpi-value{font-size:23px}.kpi-icon{width:31px;height:31px}.module-list{grid-template-columns:1fr}.section-head{margin-top:23px}.panel{padding:16px}}
+</style>
 </head>
 <body>
-<main class="dash">
-  <header class="dash-head">
-    <div>
-      <h1>SANCHAY <span>AI</span></h1>
-      <p class="muted">{{ role }} Workspace · {{ business }}</p>
-    </div>
-    <a class="dash-link" href="{{ url_for('logout') }}">Log out</a>
+<div class="layout">
+<aside class="sidebar">
+  <a class="brand" href="{{ url_for('admin') if role == 'Admin' else url_for('staff') }}">
+    <span class="brand-icon">S</span><span>SANCHAY <small>AI · SMART INVENTORY</small></span>
+  </a>
+  <nav>
+    <div class="nav-label">WORKSPACE</div>
+    <a class="nav-link active" href="{{ url_for('admin') if role == 'Admin' else url_for('staff') }}"><span class="nav-icon">▦</span>Dashboard</a>
+    {% if role == 'Admin' %}
+    <div class="nav-label">BUSINESS MANAGEMENT</div>
+    <a class="nav-link" href="{{ url_for('products') }}"><span class="nav-icon">▤</span>Inventory</a>
+    {% endif %}
+    <a class="nav-link" href="{{ url_for('sales') }}"><span class="nav-icon">▧</span>Sales & Billing</a>
+    {% if role == 'Admin' %}
+    <a class="nav-link" href="{{ url_for('suppliers') }}"><span class="nav-icon">♧</span>Suppliers</a>
+    <a class="nav-link" href="{{ url_for('purchases') }}"><span class="nav-icon">↙</span>Purchases</a>
+    <a class="nav-link" href="{{ url_for('credits') }}"><span class="nav-icon">₹</span>Credit & Borrowing</a>
+    <a class="nav-link" href="{{ url_for('reports') }}"><span class="nav-icon">▥</span>Reports & Analytics</a>
+    {% endif %}
+    <div class="nav-label">ACCOUNT</div>
+    <a class="nav-link" href="{{ url_for('logout') }}"><span class="nav-icon">↪</span>Log out</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="profile"><div class="avatar">{{ role[0] }}</div><div><strong>{{ role }} account</strong><small>{{ business }}</small></div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div><div class="eyebrow">YOUR BUSINESS AT A GLANCE</div><h1>Dashboard overview</h1></div>
+    <div class="top-actions"><span class="date-chip">✦ &nbsp; {{ role }} workspace</span><a class="logout" href="{{ url_for('logout') }}">Log out ↗</a></div>
   </header>
 
-  <h2>Business overview</h2>
-  <p class="muted">Your business information in one place.</p>
-
-  <section class="dash-grid">
-    <article class="dash-card">
-      <p>Total products</p><h2>{{ metrics.products }}</h2>
-    </article>
-    <article class="dash-card">
-      <p>Units in stock</p><h2>{{ metrics.units }}</h2>
-    </article>
-    <article class="dash-card">
-      <p>Stock purchase value</p><h2>₹{{ "%.2f"|format(metrics.stock_value) }}</h2>
-    </article>
-    <article class="dash-card">
-      <p>Today's sales</p><h2>₹{{ "%.2f"|format(metrics.today_sales) }}</h2>
-    </article>
-    <article class="dash-card">
-      <p>This month's sales</p><h2>₹{{ "%.2f"|format(metrics.month_sales) }}</h2>
-    </article>
-    <article class="dash-card">
-      <p>Low-stock products</p><h2>{{ metrics.low_stock }}</h2>
-    </article>
+  <section class="welcome">
+    <div class="welcome-copy">
+      <div class="tag">✦ &nbsp; SMART BUSINESS MANAGEMENT</div>
+      <h2>Welcome back, {{ role }}! 👋</h2>
+      <p>Welcome to {{ business }}. Manage your inventory, track sales and keep your business moving — all from one workspace.</p>
+    </div>
+    <div class="welcome-mark">◈</div>
   </section>
 
-  {% if role == "Admin" %}
-  <h2>Management modules</h2>
-  <section class="module-grid">
-    <article class="module-card">
-      <h3>📦 Inventory</h3>
-      <p>Products, SKU/barcodes, stock levels, batches and expiry dates.</p>
-      <a href="/products">Open inventory →</a>
-    </article>
-    <article class="module-card">
-      <h3>🧾 Sales & billing</h3>
-      <p><a href="{{ url_for('sales') }}">Open Sales & Billing →</a></p>
-      <p>Checkout, receipts, transaction history and stock deduction.</p>
-      <p>Module in development</p>
-    </article>
-    <article class="module-card">
-      <h3>🚚 Suppliers & purchases</h3>
-      <p>Supplier records, purchase orders and stock receiving.</p>
-      <p>Module in development</p>
-    </article>
-    <article class="module-card">
-      <h3>💳 Credit & borrowing</h3>
-      <p>Customer balances, repayment history and borrower evidence.</p>
-      <p>Module in development</p>
-    </article>
-    <article class="module-card">
-      <h3>📊 Reports & analytics</h3>
-      <p>Sales trends, stock valuation and business performance.</p>
-      <p>Module in development</p>
-    </article>
-    <article class="module-card">
-      <h3>🤖 SANCHAY AI</h3>
-      <p>Inventory questions and verified business insights.</p>
-      <p>Module in development</p>
-    </article>
+  <div class="section-head"><div><h2>Business snapshot</h2><p>Your key inventory and sales figures.</p></div></div>
+  <section class="kpis">
+    <article class="kpi"><div class="kpi-top"><span>Total products</span><span class="kpi-icon">📦</span></div><div class="kpi-value">{{ metrics.products }}</div><div class="kpi-foot">Products in your inventory</div></article>
+    <article class="kpi"><div class="kpi-top"><span>Units in stock</span><span class="kpi-icon">🟢</span></div><div class="kpi-value">{{ metrics.units }}</div><div class="kpi-foot">Total quantity available</div></article>
+    <article class="kpi"><div class="kpi-top"><span>Stock purchase value</span><span class="kpi-icon">💰</span></div><div class="kpi-value">₹{{ "%.0f"|format(metrics.stock_value) }}</div><div class="kpi-foot">Value at purchase cost</div></article>
+    <article class="kpi"><div class="kpi-top"><span>Today's sales</span><span class="kpi-icon">🧾</span></div><div class="kpi-value">₹{{ "%.2f"|format(metrics.today_sales) }}</div><div class="kpi-foot">Sales recorded today{% if role == 'Staff' %} by you{% endif %}</div></article>
+    <article class="kpi"><div class="kpi-top"><span>This month's sales</span><span class="kpi-icon">📈</span></div><div class="kpi-value">₹{{ "%.0f"|format(metrics.month_sales) }}</div><div class="kpi-foot">Sales recorded this month</div></article>
+    <article class="kpi"><div class="kpi-top"><span>Low-stock products</span><span class="kpi-icon">⚠️</span></div><div class="kpi-value">{{ metrics.low_stock }}</div><div class="kpi-foot">Products at or below threshold</div></article>
   </section>
-  {% else %}
-  <h2>Staff workspace</h2>
-  <section class="module-grid">
-    <article class="module-card">
-      <h3>🧾 Sales & billing</h3>
-      <p><a href="{{ url_for('sales') }}">Open Sales & Billing →</a></p>
-      <p>Sales workflow and receipts.</p>
-      <p>Module in development</p>
-    </article>
-    <article class="module-card">
-      <h3>📦 Inventory lookup</h3>
-      <p>Product and stock lookup for permitted tasks.</p>
-      <p>Module in development</p>
-    </article>
-    <article class="module-card">
-      <h3>🕒 Recent transactions</h3>
-      <p>Today's sales: {{ metrics.today_transactions }} transactions.</p>
-    </article>
-  </section>
-  {% endif %}
 
-  <section class="dash-panel">
-    <h3>Workspace access</h3>
-    <p class="muted">
-      You are signed in as {{ role }}. Administrative pages remain restricted
-      according to your account role.
-    </p>
-  </section>
+  <div class="content-grid">
+    <section class="panel">
+      <h3>{% if role == 'Admin' %}Business management{% else %}Your workspace{% endif %}</h3>
+      <p class="panel-sub">Choose a module to get started.</p>
+      <div class="module-list">
+        {% if role == 'Admin' %}
+        <a class="module" href="{{ url_for('products') }}"><span class="module-icon">📦</span><span><h4>Inventory</h4><p>Products and stock levels</p></span><span class="arrow">↗</span></a>
+        {% endif %}
+        <a class="module" href="{{ url_for('sales') }}"><span class="module-icon">🧾</span><span><h4>Sales & Billing</h4><p>Sales and transactions</p></span><span class="arrow">↗</span></a>
+        {% if role == 'Admin' %}
+        <a class="module" href="{{ url_for('suppliers') }}"><span class="module-icon">🚚</span><span><h4>Suppliers</h4><p>Manage supplier records</p></span><span class="arrow">↗</span></a>
+        <a class="module" href="{{ url_for('purchases') }}"><span class="module-icon">🛒</span><span><h4>Purchases</h4><p>Record stock purchases</p></span><span class="arrow">↗</span></a>
+        <a class="module" href="{{ url_for('credits') }}"><span class="module-icon">💳</span><span><h4>Credit & Borrowing</h4><p>Balances and repayments</p></span><span class="arrow">↗</span></a>
+        <a class="module" href="{{ url_for('reports') }}"><span class="module-icon">📊</span><span><h4>Reports & Analytics</h4><p>Review business performance</p></span><span class="arrow">↗</span></a>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3>Quick insights</h3>
+      <p class="panel-sub">A quick view of your current business.</p>
+      <div class="quick-list">
+        <div class="quick-link"><span class="quick-icon">📦</span><span><strong>{{ metrics.products }} products tracked</strong><small>Across your inventory</small></span></div>
+        <div class="quick-link"><span class="quick-icon">⚠️</span><span><strong>{{ metrics.low_stock }} low-stock products</strong><small>{% if metrics.low_stock > 0 %}Review stock replenishment{% else %}No products below threshold{% endif %}</small></span></div>
+        <div class="quick-link"><span class="quick-icon">🧾</span><span><strong>{{ metrics.today_transactions }} transactions today</strong><small>{% if role == 'Staff' %}Recorded by your account{% else %}Across the business{% endif %}</small></span></div>
+      </div>
+      <div class="bottom-note">✦ &nbsp; <strong>SANCHAY AI</strong><br>One place for smarter inventory and business management.</div>
+    </section>
+  </div>
+  <footer>SANCHAY AI · SMART INVENTORY MANAGEMENT · YOUR BUSINESS, ORGANIZED.</footer>
 </main>
+</div>
 </body>
 </html>
-
-<p><a href="{{ url_for('suppliers') }}">Manage Suppliers →</a></p>
-
-<p><a href="{{ url_for('purchases') }}">Record Purchases →</a></p>
-
-<p><a href="{{ url_for('credits') }}">Credit & Borrowing →</a></p>
-
-<p><a href="{{ url_for('reports') }}">Reports & Analytics →</a></p>

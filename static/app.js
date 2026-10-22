@@ -56,11 +56,6 @@
   const agree = document.getElementById('agreeTerms');
   const create = document.getElementById('createAccount');
   agree?.addEventListener('change',()=>{create.disabled=!agree.checked});
-
-  document.getElementById('signupForm')?.addEventListener('submit',e=>{
-    e.preventDefault();
-    alert('The registration interface is ready. Account creation will be connected to the database in the next step.');
-  });
   document.querySelectorAll('[data-social]').forEach(btn=>btn.addEventListener('click',()=>{
     alert(`${btn.dataset.social} sign-in will work after its authentication provider is configured.`);
   }));
